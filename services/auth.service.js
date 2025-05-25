@@ -1,5 +1,5 @@
-const jwtUtil = require("../utils/jwt");
 const userRepo = require("../repositories/user.repository");
+const tokenFactory = require("../factories/tokenFactory");
 const { createError } = require("../utils/createError");
 const { convertToSlug } = require("../utils/convertToSlug");
 const bcrypt = require("bcrypt");
@@ -32,7 +32,7 @@ class AuthService{
     delete user.refreshToken;
 
     return({
-      accessToken: jwtUtil.generateAccessToken(user._id),
+      accessToken: tokenFactory.generateToken("access", { id: user._id }),
       user
     });
   }

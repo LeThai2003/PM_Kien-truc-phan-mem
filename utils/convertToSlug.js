@@ -1,6 +1,6 @@
-import unicode from "unidecode";
+const unicode = require("unidecode");
 
-export const convertToSlug = (text) => {
+module.exports.convertToSlug = (text) => {
 
   const unicodeText = unicode(text);
 

@@ -3,6 +3,7 @@ require("dotenv").config();
 const database = require("./database/index");
 const {errorHandler} = require("./middlewares/error.middleware");
 const authRoute = require("./routes/auth.route");
+const projectRoute = require("./routes/project.route");
 
 
 // ----connect database----
@@ -17,6 +18,7 @@ app.use(express.json());
 
 // -----route-----
 app.use("/auth", authRoute);
+app.use("/project", projectRoute);
 // ----end route----
 
 app.use(errorHandler);
