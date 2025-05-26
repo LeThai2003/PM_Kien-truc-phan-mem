@@ -13,6 +13,10 @@ class UserRepository {
     return User.findByIdAndUpdate(userId, {password: newPassword});
   }
 
+  findById(userId){
+    return User.findOne({_id: userId}).select("-password -refreshToken");
+  }
+
 }
 
 module.exports = new UserRepository();

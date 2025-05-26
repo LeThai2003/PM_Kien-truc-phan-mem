@@ -19,7 +19,7 @@ const projectSchema = new mongoose.Schema({
     email: {type: String, required: true},
     invitedAt: {type: Date, default: Date.now},
     token: {type: String, required: true},
-    expireAt: { type: Date, default: Date.now, expires: 10 * 60}
+    expireAt: { type: Date, default: Date.now, expires: 7 * 24 * 3600}
   }]
 });
 

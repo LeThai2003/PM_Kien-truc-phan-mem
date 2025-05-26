@@ -14,6 +14,8 @@ database;
 const app = express();
 
 app.use(express.json());
+app.set("views", `${__dirname}/views`);
+app.set("view engine", "pug");
 // ----end config app-----
 
 // -----route-----
