@@ -4,6 +4,7 @@ const database = require("./database/index");
 const {errorHandler} = require("./middlewares/error.middleware");
 const authRoute = require("./routes/auth.route");
 const projectRoute = require("./routes/project.route");
+const taskRoute = require("./routes/task.route");
 
 
 // ----connect database----
@@ -21,6 +22,7 @@ app.set("view engine", "pug");
 // -----route-----
 app.use("/auth", authRoute);
 app.use("/project", projectRoute);
+app.use("/task", taskRoute);
 // ----end route----
 
 app.use(errorHandler);

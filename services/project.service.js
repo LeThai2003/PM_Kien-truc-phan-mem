@@ -29,8 +29,11 @@ const updateProject = async ({projectId, projectName, description, startDate, en
     throw createError(400, "You couldn't change the information of this project");
   }
 
+  const slugName = convertToSlug(projectName);
+
   await projectRepo.updateProject(projectId, {
     name: projectName,
+    slugName,
     description,
     startDate,
     endDate
@@ -80,7 +83,9 @@ const confirmInvite = async (token) => {
 
     const member = await userRepo.findById(memberId);
 
-    // console.log(member);
+    //  ------------ notication here ------------
+    
+    //  --------- end notication here -----------
 
     return { project, member };
 

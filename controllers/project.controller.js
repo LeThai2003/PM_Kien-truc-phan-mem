@@ -68,6 +68,7 @@ module.exports.confirmInvite = async (req, res, next) => {
     console.log("------haha-----");
     const result = await projectService.confirmInvite(req.query.token);
     // ---socket notification member + add member to project---
+
     // ---end socket notification member + add member to project---
     console.log(result);
 
@@ -78,3 +79,5 @@ module.exports.confirmInvite = async (req, res, next) => {
     next(error);
   }
 }
+
+// 
