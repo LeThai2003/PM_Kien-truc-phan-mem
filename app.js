@@ -6,6 +6,7 @@ const authRoute = require("./routes/auth.route");
 const projectRoute = require("./routes/project.route");
 const taskRoute = require("./routes/task.route");
 const uploadRoute = require("./routes/upload.route");
+const commentRoute = require("./routes/comment.route");
 
 
 // ----connect database----
@@ -25,6 +26,7 @@ app.use("/auth", authRoute);
 app.use("/project", projectRoute);
 app.use("/task", taskRoute);
 app.use("/upload", uploadRoute);
+app.use("/comment", commentRoute);
 // ----end route----
 
 app.use(errorHandler);
