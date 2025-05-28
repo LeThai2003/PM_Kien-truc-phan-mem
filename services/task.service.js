@@ -49,7 +49,7 @@ const TaskService = {
     if(task.sub_tasks?.length > 0)
     {
       task.sub_tasks = task.sub_tasks.map(sub => ({
-        ...sub.toObject(),
+        ...sub,
         isChecked: ["Under View", "Completed"].includes(toStatus) ? true :
           ["To Do"].includes(toStatus) ||
           (["Under View", "Completed"].includes(task.status) && ["To Do", "Work In Progress"].includes(toStatus)) ? false : sub.isChecked
@@ -92,7 +92,94 @@ const TaskService = {
     // ----------end socket-----------
 
     return updatedTask;
+  },
 
+  getTaskDetail: async (taskId, userId) => {
+    const task = await taskRepo.findById(taskId);
+    const project = await projectRepo.findById(task.projectId);
+    const isMember = project.authorUserId._id.equals(userId) || project.membersId?.some(m => m._id.equals(userId));
+    if(!isMember) throw createError(400, "Unauthorized to view task");
+    return task;
+  },
+
+  updateCompeletedSubTask: async (listCheck, taskId, userId) => {
+    const task = await taskRepo.findById(taskId);
+    if(!task.authorUserId._id.equals(userId) && !task.assigneeUserId?._id.equals(userId)){
+      throw createError(400, "Unauthorized to update task");
+    }
+
+    let updateTask;
+
+    if(listCheck?.length > 0){
+      if(listCheck.includes("completed")){
+        if(task.sub_tasks.length > 0) throw createError(400, "Fail!!!");
+        updateTask = await taskRepo.updateById(taskId, {status: "Under View"});
+      } else {
+        let subTasks = task.sub_tasks.toObject();
+        subTasks = subTasks.map(sub => listCheck.includes(sub._id.toString()) ? {...sub, isChecked: true} : {...sub, isChecked: false})
+        let status = listCheck.length == task.sub_tasks.length ? "Under View" : "Work In Progress";
+        updateTask = await taskRepo.updateById(taskId, {status, sub_tasks: subTasks});
+      }
+    } else {
+      let subTasks = task.sub_tasks.toObject() || [];
+      subTasks.length > 0 && (subTasks = subTasks.map(sub => ({...sub, isChecked: false})) || []);
+      updateTask = await taskRepo.updateById(taskId, {status: "To Do", sub_tasks: subTasks});
+    }
+
+    return updateTask;
+  },
+
+  getDataChart: async (userId) => {
+    const tasks = await taskRepo.findAllByUserId(userId);
+    let data = [];
+    let arrayStatus = ["To Do", "Work In Progress", "Under View", "Completed"];
+
+    if(tasks.length > 0){
+      for (const status of arrayStatus) {
+        const countRecord = tasks.filter(task => task.status == status)?.length || 0;
+        data.push({
+          status: status,
+          count: countRecord
+        })
+      }
+    }
+
+    return data;
+  },
+
+  getTasksByPriority: async (userId, priority) => {
+    const arrPriority = ['Backlog', 'Low', 'Medium', 'High', 'Urgent'];
+    if(!arrPriority.includes(priority)) throw createError(400, "Priority is not valid");
+
+    const projects = await projectRepo.findAllByUser(userId);
+    const tasks = await taskRepo.findAllByUserId(userId, {priority});
+
+    let dataResult = [];
+    if(tasks.length > 0){
+      for (const project of projects) {
+        const tasksResult = tasks.filter(task => task.projectId.equals(project._id));
+        if(tasksResult.length > 0){
+          dataResult.push({
+            project: {
+              id: project._id,
+              name: project.name
+            },
+            tasks: tasksResult
+          })
+        }
+      }
+    }
+
+    return dataResult;
+  },
+
+  deleteTask: async (taskId, userId) => {
+    const task = await taskRepo.findById(taskId);
+    if(!task) throw createError(400, "Task not found");
+    if(!task.authorUserId._id.equals(userId)) throw createError(400, "Unauthorized to delete task");
+    // ---- delete notifications + socket for related user ----
+    // ---- end delete notifications ----
+    await taskRepo.deleteById(taskId);
   }
 
 }

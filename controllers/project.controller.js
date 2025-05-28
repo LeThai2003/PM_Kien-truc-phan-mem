@@ -65,7 +65,6 @@ module.exports.addMemberToProject = async (req, res, next) => {
 // [GET] /project/invite/confirm
 module.exports.confirmInvite = async (req, res, next) => {
   try {
-    console.log("------haha-----");
     const result = await projectService.confirmInvite(req.query.token);
     // ---socket notification member + add member to project---
 
@@ -80,4 +79,22 @@ module.exports.confirmInvite = async (req, res, next) => {
   }
 }
 
-// 
+// [GET] /project/data/chart
+module.exports.dataChart = async (req, res, next) => {
+  try {
+    const data = await projectService.getChartData(req.userId);
+    return res.status(200).json({message: "Get data projects for chart successfully", data: data, total: data?.length || 0});
+  } catch (error) {
+    next(error);
+  }
+}
+
+// [GET] /project/get-percent-completed
+module.exports.percentCompleted = async (req, res, next) => {
+  try {
+    const result = await projectService.getPercentCompeleted(req.userId);
+    return res.status(200).json({message: "Get percent completed successfully", result})
+  } catch (error) {
+    next(error);
+  }
+}

@@ -15,5 +15,9 @@ router.get("/get-all", projectController.getAll);
 
 router.post("/:id/add-member", projectController.addMemberToProject);
 
+router.get("/data/chart", projectController.dataChart);
+
+router.get("/get-percent-completed", projectController.percentCompleted);
+
 
 module.exports = router;

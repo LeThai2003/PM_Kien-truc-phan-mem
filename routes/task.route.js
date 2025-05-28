@@ -14,4 +14,14 @@ router.patch("/update-status", TaskController.updateStatus);
 
 router.patch("/update/:taskId", TaskController.updateTask);
 
+router.get("/:taskId", TaskController.taskDetail);
+
+router.patch("/update-completed/:taskId", TaskController.updateCompleted);
+
+router.get("/data/chart", TaskController.dataChart);
+
+router.get("/priority/:priority", TaskController.tasksPriority);
+
+router.delete("/delete/:taskId", TaskController.deleteTask);
+
 module.exports = router;
