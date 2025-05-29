@@ -9,6 +9,8 @@ const EVENT_TYPES = {
   },
   TASK: {
     NEW: "TASK_NEW",
+    UPDATE_DRAG: "UPDATE_DRAG_AND_DROP",
+    UPDATE: "UPDATE"
   },
   MEMBER: {
     NEW: "MEMBER_ADD",

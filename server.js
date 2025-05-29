@@ -3,6 +3,7 @@ const http = require("http");
 const {initSocket} = require("./socket/index");
 require("./events/listeners/commentEvent");
 require("./events/listeners/notificationEvent");
+require("./events/listeners/taskEvent");
 
 const PORT = process.env.PORT || 3000;
 

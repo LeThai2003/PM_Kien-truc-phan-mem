@@ -15,6 +15,7 @@ module.exports.getAllNotifications = async (req, res, next) => {
 module.exports.updateSeen = async (req, res, next) => {
   try {
     const {id} = req.params;
+    console.log(id);
     await NotificationService.updateSeenNotification(id);
     return res.status(200).json("Seen Notification");
   } catch (error) {

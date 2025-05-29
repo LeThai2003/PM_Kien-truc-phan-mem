@@ -3,9 +3,7 @@ const Notification = require("../models/notification.model");
 
 const NotificationRepository = {
   createAndSave: async (type, data) => {
-    console.log(type, data);
     const notification = NotificationFactory.create(type, data);
-    console.log("-----------", notification);
     return await notification.save();
   },
 

@@ -7,6 +7,7 @@ const userRepo = require("../repositories/user.repository");
 const { createError } = require("../utils/createError");
 const eventBus = require("../events/eventBus");
 const EVENT_TYPES = require("../events/eventType");
+const {userTaskMap} = require("../socket/maps");
 
 const CommentService = {
   createComment: async (data, userId, taskId) => {
@@ -33,18 +34,20 @@ const CommentService = {
 
     // ------ Notification for task's author & assignee (necessary). Then save in database
     let relatedUserNotify = [task.authorUserId._id, task.assigneeUserId?._id];
-    console.log(relatedUserNotify);
-    for (const id of relatedUserNotify) {
-      if(id.equals(userId)) continue;
+    // console.log(relatedUserNotify);
+    for (const targetUserId of relatedUserNotify) {
 
-      const notification = await notificationRepo.createAndSave(
-        type = "comment",
-        data = { user: userFullname, task, comment: newComment, targetUserId: id }
-      )
+      if (targetUserId.toString() == userId) continue;
 
-      console.log(notification);
+      const viewingTask = userTaskMap.get(targetUserId.toString());
 
-      eventBus.emit(EVENT_TYPES.NOTIFICATION.NEW_COMMENT, {notification: notification});
+      if (!viewingTask || (viewingTask !== taskId)){
+        const notification = await notificationRepo.createAndSave(
+          type = "comment",
+          data = { user: userFullname, task, comment: newComment, targetUserId }
+        )
+        eventBus.emit(EVENT_TYPES.NOTIFICATION.NEW_COMMENT, {notification: notification});
+      }
     }
     // -----------end socket----------------
 
@@ -74,6 +77,7 @@ const CommentService = {
     const updatedComment = await commentRepo.update(commentId, data);
 
     // -------socket update comment-----
+    eventBus.emit(EVENT_TYPES.COMMENT.UPDATE, {commentUpdate: updatedComment});
     // -----end socket update comment---
 
     return updatedComment;
@@ -85,13 +89,16 @@ const CommentService = {
     if(!comment.userId._id.equals(userId)) throw createError(400, "Unauthorized to delete comment");
 
     // --------socket delete comment for room task (people are viewing) -------
+    eventBus.emit(EVENT_TYPES.COMMENT.DELETE, {comment});
     // ------end socket delete comment for room task (people are viewing) -----
 
     // --------- delete records with commentId in Notification + socket to delete on navbar's notification------
     const notifications = await notificationRepo.findNotificationByCommentId(commentId);
-    // if(notifications.length > 0){
-    //   // socket here
-    // }
+    if(notifications.length > 0){
+      for (const item of notifications) {
+        eventBus.emit(EVENT_TYPES.NOTIFICATION.DELETE_COMMENT, {commentId: item.commentId, userId: item.userId});
+      }
+    }
     await notificationRepo.deleteByCommentId(commentId);
     // -------end delete records with commentId in Notification + socket to delete on navbar's notification-----
 
@@ -112,6 +119,7 @@ const CommentService = {
     );
 
     // ---------socket announce comment update like------
+    eventBus.emit(EVENT_TYPES.COMMENT.LIKE, {comment, userId: userId.toString()})
     // -------end socket announce comment update like------
   }
 

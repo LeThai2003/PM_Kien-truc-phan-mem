@@ -4,6 +4,8 @@ const userRepo = require("../repositories/user.repository");
 const notificationRepo = require("../repositories/notification.repository");
 const {createError} = require("../utils/createError");
 const {convertToSlug} = require("../utils/convertToSlug");
+const eventBus = require("../events/eventBus");
+const EVENT_TYPES = require("../events/eventType");
 
 const TaskService = {
   createTask: async (data, userId) => {
@@ -28,16 +30,17 @@ const TaskService = {
     if(relatedUserNotify.length > 0)
     {
       for (const uid of relatedUserNotify) {
-        await notificationRepo.createAndSave(
+        const notification = await notificationRepo.createAndSave(
           type = "task",
           data = { user: infoUser, task, project, targetUserId: uid }
         )
+
+        eventBus.emit(EVENT_TYPES.NOTIFICATION.NEW_TASK, { notification })
       }
+      
+      eventBus.emit(EVENT_TYPES.TASK.NEW, {task, relatedUserNotify});
     }
     // -------end notication for user relatied------
-
-    // ---------socket here: user related + new task-----------
-    // ----------end socket-----------
 
     return infoTask;
   },
@@ -69,10 +72,15 @@ const TaskService = {
     task.status = toStatus;
     const updatedTask = await taskRepo.updateById(task._id, task);
 
+    const project = await projectRepo.findById(task.projectId._id);
+    const memberIds = [project.authorUserId._id, ...(project.membersId || []).map(m => m._id)];
+    const relatedUserNotify = memberIds.filter(id => !id.equals(userId));
+
     // --------notication for user relatied-----
     // -------end notication for user relatied------
 
     // ---------socket here: drag and drop-----------
+    eventBus.emit(EVENT_TYPES.TASK.UPDATE_DRAG, {task: updatedTask, relatedUserNotify})
     // ----------end socket-----------    
 
     return updatedTask;
@@ -98,8 +106,16 @@ const TaskService = {
 
     const updatedTask = await taskRepo.updateById(taskId, data);
 
-    // ---------socket here: update task-----------
-    // ----------end socket-----------
+    const project = await projectRepo.findById(task.projectId._id);
+    const memberIds = [project.authorUserId._id, ...(project.membersId || []).map(m => m._id)];
+    const relatedUserNotify = memberIds.filter(id => !id.equals(userId));
+    
+    // --------notication for user relatied-----
+    // -------end notication for user relatied------
+
+    // ---------socket here: drag and drop-----------
+    eventBus.emit(EVENT_TYPES.TASK.UPDATE, {task: updatedTask, relatedUserNotify})
+    // ----------end socket-----------    
 
     return updatedTask;
   },
@@ -189,9 +205,11 @@ const TaskService = {
     if(!task.authorUserId._id.equals(userId)) throw createError(400, "Unauthorized to delete task");
     // ---- delete notifications + socket for related user ----
     const notifications = await notificationRepo.findNotificationByTaskId(taskId);
-    // if(notifications.length > 0){
-    //   // socket here
-    // }
+    if(notifications.length > 0){
+      for (const item of notifications) {
+        eventBus.emit(EVENT_TYPES.NOTIFICATION.DELETE_TASK, {taskId: item.taskId, userId: item.userId});
+      }
+    }
     await notificationRepo.deleteByTaskId(taskId);
     // ---- end delete notifications ----
     await taskRepo.deleteById(taskId);
