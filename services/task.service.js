@@ -1,6 +1,7 @@
 const projectRepo = require("../repositories/project.repository");
 const taskRepo = require("../repositories/task.repository");
 const userRepo = require("../repositories/user.repository");
+const notificationRepo = require("../repositories/notification.repository");
 const {createError} = require("../utils/createError");
 const {convertToSlug} = require("../utils/convertToSlug");
 
@@ -8,7 +9,7 @@ const TaskService = {
   createTask: async (data, userId) => {
     const {projectId, title, assigneeUserId} = data;
     const project = await projectRepo.findById(projectId);
-    const memberIds = [project.authorUserId._id, ...(project.membersId || []).map(m => m._id.toString())];
+    const memberIds = [project.authorUserId._id, ...(project.membersId || []).map(m => m._id)];
 
     if(!memberIds.some(id => id.equals(userId))) throw createError(400, "Unauthorized to create task");
 
@@ -20,10 +21,19 @@ const TaskService = {
     });
 
     const infoTask = await taskRepo.findById(task._doc._id);
-    const relatedUserNotify = memberIds.filter(id => id !== userId);
+    const relatedUserNotify = memberIds.filter(id => !id.equals(userId));
     const infoUser = await userRepo.findById(userId);
 
     // --------notication for user relatied-----
+    if(relatedUserNotify.length > 0)
+    {
+      for (const uid of relatedUserNotify) {
+        await notificationRepo.createAndSave(
+          type = "task",
+          data = { user: infoUser, task, project, targetUserId: uid }
+        )
+      }
+    }
     // -------end notication for user relatied------
 
     // ---------socket here: user related + new task-----------
@@ -178,6 +188,11 @@ const TaskService = {
     if(!task) throw createError(400, "Task not found");
     if(!task.authorUserId._id.equals(userId)) throw createError(400, "Unauthorized to delete task");
     // ---- delete notifications + socket for related user ----
+    const notifications = await notificationRepo.findNotificationByTaskId(taskId);
+    // if(notifications.length > 0){
+    //   // socket here
+    // }
+    await notificationRepo.deleteByTaskId(taskId);
     // ---- end delete notifications ----
     await taskRepo.deleteById(taskId);
   }

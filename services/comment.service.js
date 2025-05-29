@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const taskRepo = require("../repositories/task.repository");
 const projectRepo = require("../repositories/project.repository");
 const commentRepo = require("../repositories/comment.repository");
+const notificationRepo = require("../repositories/notification.repository");
 const userRepo = require("../repositories/user.repository");
 const { createError } = require("../utils/createError");
 
@@ -70,6 +71,11 @@ const CommentService = {
     // ------end socket delete comment for room task (people are viewing) -----
 
     // --------- delete records with commentId in Notification + socket to delete on navbar's notification------
+    const notifications = await notificationRepo.findNotificationByCommentId(commentId);
+    // if(notifications.length > 0){
+    //   // socket here
+    // }
+    await notificationRepo.deleteByCommentId(commentId);
     // -------end delete records with commentId in Notification + socket to delete on navbar's notification-----
 
     await commentRepo.delete(commentId);

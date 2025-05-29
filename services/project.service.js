@@ -2,6 +2,7 @@ const {convertToSlug} = require("../utils/convertToSlug");
 const projectRepo = require("../repositories/project.repository");
 const userRepo = require("../repositories/user.repository");
 const taskRepo = require("../repositories/task.repository");
+const notificationRepo = require("../repositories/notification.repository");
 const {createError} = require("../utils/createError");
 const tokenFactory = require("../factories/tokenFactory");
 const mailFactory = require("../factories/mailFactory");
@@ -59,7 +60,7 @@ const addMember = async ({projectId, memberId, userId}) => {
     throw createError(400, "User is not valid");
   }
   
-  const tokenInvite = tokenFactory.generateToken("member", {email: member.email, memberId, type: "invite", projectId}); 
+  const tokenInvite = tokenFactory.generateToken("member", {email: member.email, memberId, typeEmail: "invite", projectId}); 
 
   await projectRepo.pushInvitation(projectId, {email: member.email, token: tokenInvite});
 
@@ -69,9 +70,9 @@ const addMember = async ({projectId, memberId, userId}) => {
 const confirmInvite = async (token) => {
   try {
     const decoded = tokenFactory.verifyToken("member", token);
-    const { email, memberId, projectId, type } = decoded;
+    const { email, memberId, projectId, typeEmail } = decoded;
 
-    if(type !== "invite") throw createError(400, "Invalid token type");
+    if(typeEmail !== "invite") throw createError(400, "Invalid token type");
 
     const project = await projectRepo.findById(decoded.projectId);
 
@@ -79,15 +80,18 @@ const confirmInvite = async (token) => {
     {
       throw createError(400, "User is not valid");
     }
-
-    await projectRepo.confirmMember(projectId, memberId, email);
-
-    const member = await userRepo.findById(memberId);
-
-    //  ------------ notication here ------------
     
+    const member = await userRepo.findById(memberId);
+    
+    //  ------------ notication here ------------
+    await notificationRepo.createAndSave(
+      type = "member",
+      data = { member, project}
+    )
     //  --------- end notication here -----------
 
+    await projectRepo.confirmMember(projectId, memberId, email);
+    
     return { project, member };
 
   } catch (error) {
