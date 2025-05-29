@@ -9,14 +9,14 @@ const TaskRepository = {
 
   findById: async (id) => {
     return await Task.findById(id)
-      .populate("authorUserId", "-password -refreshToken")
-      .populate("assigneeUserId", "-password -refreshToken");
+      .populate("authorUserId", "-password -refreshToken -createdAt -updatedAt")
+      .populate("assigneeUserId", "-password -refreshToken -createdAt -updatedAt");
   },
 
   findAllByProject: async (projectId) => {
     return await Task.find({projectId})
-      .populate("authorUserId", "-password -refreshToken")
-      .populate("assigneeUserId", "-password -refreshToken");
+      .populate("authorUserId", "-password -refreshToken -createdAt -updatedAt")
+      .populate("assigneeUserId", "-password -refreshToken -createdAt -updatedAt");
   },
 
   findAllByProjectsAndFields: async (projectIds, filter = {}) => {
@@ -26,8 +26,8 @@ const TaskRepository = {
         filter
       ]
     })
-      .populate("authorUserId", "-password -refreshToken")
-      .populate("assigneeUserId", "-password -refreshToken");
+      .populate("authorUserId", "-password -refreshToken -createdAt -updatedAt")
+      .populate("assigneeUserId", "-password -refreshToken -createdAt -updatedAt");
   },
 
   findAllByUserId: async (userId, filter = {}) => {
@@ -42,14 +42,14 @@ const TaskRepository = {
         filter
       ]
     })
-      .populate("authorUserId", "-password -refreshToken")
-      .populate("assigneeUserId", "-password -refreshToken");
+      .populate("authorUserId", "-password -refreshToken -createdAt -updatedAt")
+      .populate("assigneeUserId", "-password -refreshToken -createdAt -updatedAt");
   },
 
   updateById: async (id, data) => {
     const updatedTask = await Task.findByIdAndUpdate(id, data, { new: true })
-      .populate("authorUserId", "-password -refreshToken")
-      .populate("assigneeUserId", "-password -refreshToken");
+      .populate("authorUserId", "-password -refreshToken -createdAt -updatedAt")
+      .populate("assigneeUserId", "-password -refreshToken -createdAt -updatedAt");
     return updatedTask;
   },
 

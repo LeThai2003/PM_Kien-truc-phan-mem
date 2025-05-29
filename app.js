@@ -7,6 +7,8 @@ const projectRoute = require("./routes/project.route");
 const taskRoute = require("./routes/task.route");
 const uploadRoute = require("./routes/upload.route");
 const commentRoute = require("./routes/comment.route");
+const userRoute = require("./routes/user.route");
+const searchRoute = require("./routes/search.route");
 
 
 // ----connect database----
@@ -27,6 +29,8 @@ app.use("/project", projectRoute);
 app.use("/task", taskRoute);
 app.use("/upload", uploadRoute);
 app.use("/comment", commentRoute);
+app.use("/user", userRoute);
+app.use("/search", searchRoute);
 // ----end route----
 
 app.use(errorHandler);

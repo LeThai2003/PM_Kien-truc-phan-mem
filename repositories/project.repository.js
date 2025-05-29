@@ -7,23 +7,28 @@ const createProject = async (data) => {
 
 const findById = async (projectId) => {
   return await Project.findById(projectId)
-    .populate({path: "authorUserId", select: "-password -refreshToken"})
-    .populate({path: "membersId", select: "-password -refreshToken"});
+    .populate({path: "authorUserId", select: "-password -refreshToken -createdAt -updatedAt"})
+    .populate({path: "membersId", select: "-password -refreshToken -createdAt -updatedAt"});
 };
 
 const updateProject = async (projectId, updateData) => {
   return await Project.updateOne({_id: projectId}, updateData);
 };
 
-const findAllByUser = async (userId) => {
+const findAllByUser = async (userId, filter = {}) => {
   return await Project.find({
-    $or: [
-      { authorUserId: userId},
-      { membersId: userId},
+    $and: [
+      {
+        $or: [
+          { authorUserId: userId},
+          { membersId: userId},
+        ]
+      },
+      filter
     ]
   })
-    .populate({path: "authorUserId", select: "-password -refreshToken"})
-    .populate({path: "membersId", select: "-password -refreshToken"});
+    .populate({path: "authorUserId", select: "-password -refreshToken -createdAt -updatedAt"})
+    .populate({path: "membersId", select: "-password -refreshToken -createdAt -updatedAt"});
 };
 
 const pushInvitation = async (projectId, invitation) => {
