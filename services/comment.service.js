@@ -5,6 +5,8 @@ const commentRepo = require("../repositories/comment.repository");
 const notificationRepo = require("../repositories/notification.repository");
 const userRepo = require("../repositories/user.repository");
 const { createError } = require("../utils/createError");
+const eventBus = require("../events/eventBus");
+const EVENT_TYPES = require("../events/eventType");
 
 const CommentService = {
   createComment: async (data, userId, taskId) => {
@@ -22,13 +24,28 @@ const CommentService = {
 
     const newComment = await commentRepo.create(data);
 
-    const userFullname = await userRepo.findById(userId).fullname;
+    const userFullname = await userRepo.findById(userId);
 
     // -------------socket------------------
     // ------ New comment ? Reply comment (parentId in data)
-    
-    // ------ Notification for task's author & assignee (necessary). Then save in database
+    if(data.parentId) eventBus.emit(EVENT_TYPES.COMMENT.REP, {comment: newComment, taskId});
+    else eventBus.emit(EVENT_TYPES.COMMENT.NEW, {comment: newComment, taskId});
 
+    // ------ Notification for task's author & assignee (necessary). Then save in database
+    let relatedUserNotify = [task.authorUserId._id, task.assigneeUserId?._id];
+    console.log(relatedUserNotify);
+    for (const id of relatedUserNotify) {
+      if(id.equals(userId)) continue;
+
+      const notification = await notificationRepo.createAndSave(
+        type = "comment",
+        data = { user: userFullname, task, comment: newComment, targetUserId: id }
+      )
+
+      console.log(notification);
+
+      eventBus.emit(EVENT_TYPES.NOTIFICATION.NEW_COMMENT, {notification: notification});
+    }
     // -----------end socket----------------
 
     return newComment;

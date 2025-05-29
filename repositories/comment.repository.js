@@ -2,7 +2,7 @@ const Comment = require("../models/comment.model");
 
 const CommentRepository = {
   create: async (data) => {
-    return await Comment.create(data);
+    return (await Comment.create(data)).populate("userId", "fullname profilePicture");
   },
 
   getCommentsOfTask: async (taskId) => {

@@ -9,7 +9,7 @@ const NotificationFactory = {
       case "task":
         return this.createTaskCreatedNotification(data);
       case "comment":
-        return ;
+        return this.createCommentNotification(data);
       default:
         throw createError(400, `Unknow notification type: ${type}`);
     }

@@ -9,6 +9,7 @@ const TaskRepository = {
 
   findById: async (id) => {
     return await Task.findById(id)
+      .populate("projectId", "name")
       .populate("authorUserId", "-password -refreshToken -createdAt -updatedAt")
       .populate("assigneeUserId", "-password -refreshToken -createdAt -updatedAt");
   },
