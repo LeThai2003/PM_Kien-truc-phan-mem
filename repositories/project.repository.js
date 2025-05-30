@@ -38,10 +38,13 @@ const pushInvitation = async (projectId, invitation) => {
 };
 
 const confirmMember = async (projectId, memberId, email) => {
-  return await Project.updateOne({_id: projectId}, {
+  return await Project.findByIdAndUpdate(projectId, {
     $push: { membersId: memberId},
     $pull: { invitations: {email}},
-  });
+  })
+    .populate({path: "authorUserId", select: "-password -refreshToken -createdAt -updatedAt"})
+    .populate({path: "membersId", select: "-password -refreshToken -createdAt -updatedAt"})
+    .select("-invitations");
 };
 
 module.exports = {

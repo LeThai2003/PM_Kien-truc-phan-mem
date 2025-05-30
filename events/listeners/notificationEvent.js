@@ -18,7 +18,6 @@ eventBus.on(EVENT_TYPES.NOTIFICATION.DELETE_TASK, ({taskId, userId}) => {
 })
 
 eventBus.on(EVENT_TYPES.NOTIFICATION.NEW_MEMBER, ({notification}) => {
-  console.log("--------noti-------------", notification);
   _io.emit(`MEMBER_ACCEPT_JOIN_PROJECT`, {notification});
 })
 

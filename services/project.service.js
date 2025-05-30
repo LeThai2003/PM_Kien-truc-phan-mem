@@ -85,16 +85,16 @@ const confirmInvite = async (token) => {
     
     const member = await userRepo.findById(memberId);
     
-    await projectRepo.confirmMember(projectId, memberId, email);
+    const projectUpdate = await projectRepo.confirmMember(projectId, memberId, email);
 
     //  ------------ notication here ------------
     const notification = await notificationRepo.createAndSave(
       type = "member",
-      data = { member, project}
+      data = { member, project: projectUpdate}
     )
 
-    eventBus.emit(EVENT_TYPES.MEMBER.NEW, { project, member });
-    
+    eventBus.emit(EVENT_TYPES.MEMBER.NEW, { project: projectUpdate, member });
+
     eventBus.emit(EVENT_TYPES.NOTIFICATION.NEW_MEMBER, { notification })
     //  --------- end notication here -----------
 

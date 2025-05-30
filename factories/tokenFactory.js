@@ -1,16 +1,17 @@
 const jwt = require("jsonwebtoken");
-const { createError } = require("../utils/createError");
 
 class TokenFactory{
 
   static secrets = {
     access: process.env.JWT_ACCESS_SECRET,
     member: process.env.JWT_INVITE_MEMBER,
+    resetPassword: process.env.JWT_INVITE_RESET_PASSWORD
   }
 
   static expirations = {
     access: "1d",
     member: "7d",
+    resetPassword: "30m",
   }
 
   static generateToken(type, payload){

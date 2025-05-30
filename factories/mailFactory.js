@@ -16,7 +16,11 @@ const MailFactory = {
     await sendMail(memberEmail, subject, content);
   },
 
-  // send mail otp password
+  async sendOtpPassword({email, otp}){
+    const subject = `[PROJECT MANAGEMENT WEBSITE] OTP Forgot Password`;
+    const content = `Your otp code is <b style="color:red;">${otp}</b> <br> Please not share with anyone. <br> <i>The code expires in 5 minutes</i>`;
+    await sendMail(email, subject, content);
+  },
 }
 
 
