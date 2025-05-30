@@ -6,6 +6,8 @@ const notificationRepo = require("../repositories/notification.repository");
 const {createError} = require("../utils/createError");
 const tokenFactory = require("../factories/tokenFactory");
 const mailFactory = require("../factories/mailFactory");
+const eventBus = require("../events/eventBus");
+const EVENT_TYPES = require("../events/eventType");
 
 const createProject = async ({projectName, description, startDate, endDate, userId}) => {
   const slugName = convertToSlug(projectName);
@@ -83,14 +85,19 @@ const confirmInvite = async (token) => {
     
     const member = await userRepo.findById(memberId);
     
+    await projectRepo.confirmMember(projectId, memberId, email);
+
     //  ------------ notication here ------------
-    await notificationRepo.createAndSave(
+    const notification = await notificationRepo.createAndSave(
       type = "member",
       data = { member, project}
     )
+
+    eventBus.emit(EVENT_TYPES.MEMBER.NEW, { project, member });
+    
+    eventBus.emit(EVENT_TYPES.NOTIFICATION.NEW_MEMBER, { notification })
     //  --------- end notication here -----------
 
-    await projectRepo.confirmMember(projectId, memberId, email);
     
     return { project, member };
 
