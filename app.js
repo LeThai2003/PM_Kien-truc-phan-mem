@@ -1,6 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
+const cookieParser = require('cookie-parser')
 const database = require("./database/index");
 const {errorHandler} = require("./middlewares/error.middleware");
 const authRoute = require("./routes/auth.route");
@@ -21,6 +22,7 @@ database;
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 app.set("views", `${__dirname}/views`);
 app.set("view engine", "pug");
 

@@ -1,8 +1,7 @@
 const bcrypt = require("bcrypt");
 const UserRepo = require("../repositories/user.repository");
 const ForgotPasswordRepo = require("../repositories/forgotPassword.repository");
-const MailFactory = require("../factories/mailFactory");
-const TokenFactory = require("../factories/tokenFactory");
+const MailService = require("./mail.service")
 const { createError } = require("../utils/createError");
 const { generateRandomNumber } = require("../utils/generate");
 
@@ -18,7 +17,7 @@ const ForgotPasswordService = {
     const dataSave = {email, otp};
     await ForgotPasswordRepo.create(dataSave);
 
-    await MailFactory.sendOtpPassword({email, otp});
+    await MailService.sendOtpPassword({email, otp});
   },
 
   otpPassword: async (email, otp) => {

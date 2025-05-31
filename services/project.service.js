@@ -5,7 +5,7 @@ const taskRepo = require("../repositories/task.repository");
 const notificationRepo = require("../repositories/notification.repository");
 const {createError} = require("../utils/createError");
 const tokenFactory = require("../factories/tokenFactory");
-const mailFactory = require("../factories/mailFactory");
+const mailService = require("./mail.service");
 const eventBus = require("../events/eventBus");
 const EVENT_TYPES = require("../events/eventType");
 
@@ -66,7 +66,7 @@ const addMember = async ({projectId, memberId, userId}) => {
 
   await projectRepo.pushInvitation(projectId, {email: member.email, token: tokenInvite});
 
-  await mailFactory.sendProjectInvitation({userId, project, memberEmail: member.email, token: tokenInvite});
+  await mailService.sendProjectInvitation({userId, project, memberEmail: member.email, token: tokenInvite});
 }
 
 const confirmInvite = async (token) => {

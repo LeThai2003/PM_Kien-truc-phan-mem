@@ -17,6 +17,10 @@ class UserRepository {
     return User.findOne({_id: userId}).select("-password -refreshToken -createdAt -updatedAt");
   }
 
+  findRefreshTokenById(userId){
+    return User.findOne({_id: userId}).select("refreshToken");
+  }
+
   update(userId, data){
     return User.findByIdAndUpdate(userId, data, {new: true});
   }
