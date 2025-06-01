@@ -10,7 +10,7 @@ class TokenFactory{
   }
 
   static expirations = {
-    access: "2h",
+    access: "2d",
     refresh: "7d",
     member: "7d",
     resetPassword: "30m",

@@ -9,6 +9,10 @@ const EVENT_TYPES = require("../events/eventType");
 
 const TaskService = {
   createTask: async (data, userId) => {
+
+    console.log("---------------------------------");
+    console.log(data);
+
     const {projectId, title, assigneeUserId} = data;
     const project = await projectRepo.findById(projectId);
     const memberIds = [project.authorUserId._id, ...(project.membersId || []).map(m => m._id)];
@@ -63,9 +67,9 @@ const TaskService = {
     {
       task.sub_tasks = task.sub_tasks.map(sub => ({
         ...sub,
-        isChecked: ["Under View", "Completed"].includes(toStatus) ? true :
+        isChecked: ["Under Review", "Completed"].includes(toStatus) ? true :
           ["To Do"].includes(toStatus) ||
-          (["Under View", "Completed"].includes(task.status) && ["To Do", "Work In Progress"].includes(toStatus)) ? false : sub.isChecked
+          (["Under Review", "Completed"].includes(task.status) && ["To Do", "Work In Progress"].includes(toStatus)) ? false : sub.isChecked
       }));
     }
 
@@ -99,9 +103,9 @@ const TaskService = {
     if(subTasks.length > 0)
       data.sub_tasks = subTasks.map(sub => ({
         ...sub,
-        isChecked: ["Under View", "Completed"].includes(data.status) ? true :
+        isChecked: ["Under Review", "Completed"].includes(data.status) ? true :
           ["To Do"].includes(data.status) ||
-          (["Under View", "Completed"].includes(task.status) && ["To Do", "Work In Progress"].includes(data.status)) ? false : sub.isChecked
+          (["Under Review", "Completed"].includes(task.status) && ["To Do", "Work In Progress"].includes(data.status)) ? false : sub.isChecked
       }));
 
     const updatedTask = await taskRepo.updateById(taskId, data);
@@ -139,11 +143,11 @@ const TaskService = {
     if(listCheck?.length > 0){
       if(listCheck.includes("completed")){
         if(task.sub_tasks.length > 0) throw createError(400, "Fail!!!");
-        updateTask = await taskRepo.updateById(taskId, {status: "Under View"});
+        updateTask = await taskRepo.updateById(taskId, {status: "Under Review"});
       } else {
         let subTasks = task.sub_tasks.toObject();
         subTasks = subTasks.map(sub => listCheck.includes(sub._id.toString()) ? {...sub, isChecked: true} : {...sub, isChecked: false})
-        let status = listCheck.length == task.sub_tasks.length ? "Under View" : "Work In Progress";
+        let status = listCheck.length == task.sub_tasks.length ? "Under Review" : "Work In Progress";
         updateTask = await taskRepo.updateById(taskId, {status, sub_tasks: subTasks});
       }
     } else {

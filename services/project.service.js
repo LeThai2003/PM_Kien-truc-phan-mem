@@ -69,6 +69,21 @@ const addMember = async ({projectId, memberId, userId}) => {
   await mailService.sendProjectInvitation({userId, project, memberEmail: member.email, token: tokenInvite});
 }
 
+const removeMemberInv = async ({projectId, memberId, userId}) => {
+  const member = await userRepo.findById(memberId);
+  if(!member) throw createError(404, "Not find member");
+
+  const project = await projectRepo.findById(projectId);
+  if(!project.authorUserId._id.equals(userId)) throw createError(400, "You couldn't remove member invited in project");
+
+  if(project.authorUserId._id.equals(memberId) || project.membersId.some(member => member._id.equals(memberId)) || !project.invitations.some(inv => inv.email == member.email))
+  {
+    throw createError(400, "User is not valid");
+  }
+  
+  await projectRepo.pullInvitation(projectId, email = member.email);
+}
+
 const confirmInvite = async (token) => {
   try {
     const decoded = tokenFactory.verifyToken("member", token);
@@ -109,6 +124,10 @@ const confirmInvite = async (token) => {
 const getChartData = async (userId) => {
   const projects = await projectRepo.findAllByUser(userId);
   const projectIds = projects?.map(p => p._id) || [];
+  
+  let data = [];
+
+  if(projects.length == 0) return data = [];
 
   const tasks = await taskRepo.findAllByProjectsAndFields(
     projectIds, 
@@ -120,7 +139,7 @@ const getChartData = async (userId) => {
   let countUnCompleted = projectIdsWithUncompletedTasks.size;
   let countCompleted = projects.length - countUnCompleted;
 
-  const data = [
+  data = [
     {
       type: "Completed",
       percent: projects.length > 0 ? Math.round(countCompleted / projects.length * 100) : 0
@@ -186,6 +205,7 @@ module.exports = {
   updateProject,
   getAllProjectsByUser,
   addMember,
+  removeMemberInv,
   confirmInvite,
   getChartData,
   getPercentCompeleted

@@ -62,6 +62,21 @@ module.exports.addMemberToProject = async (req, res, next) => {
   }
 }
 
+// [POST] /project/:id/remove-member-inviting
+module.exports.removeMemberInviting = async (req, res, next) => {
+  try {
+    await projectService.removeMemberInv({
+      projectId: req.params.id,
+      memberId: req.body.memberId,
+      userId: new mongoose.Types.ObjectId(req.userId)
+    });
+
+    res.status(200).json({ message: "Invited successfully" });
+  } catch (error) {
+    next(error);
+  }
+}
+
 // [GET] /project/invite/confirm
 module.exports.confirmInvite = async (req, res, next) => {
   try {

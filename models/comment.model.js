@@ -9,7 +9,7 @@ const commentSchema = new mongoose.Schema({
   parentId: {type: String},
   like: [{type: mongoose.Schema.Types.ObjectId, ref: "User"}],
   createdAt: {type: Date, default: Date.now},
-  updateddAt: {type: Date},
+  updatedAt: {type: Date},
 });
 
 const Comment = mongoose.model("Comment", commentSchema);

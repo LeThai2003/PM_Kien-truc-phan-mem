@@ -37,6 +37,12 @@ const pushInvitation = async (projectId, invitation) => {
   });
 };
 
+const pullInvitation = async (projectId, email) => {
+  return await Project.updateOne({_id: projectId}, {
+    $pull: { invitations: {email}}
+  });
+};
+
 const confirmMember = async (projectId, memberId, email) => {
   return await Project.findByIdAndUpdate(projectId, {
     $push: { membersId: memberId},
@@ -53,5 +59,6 @@ module.exports = {
   updateProject,
   findAllByUser,
   pushInvitation,
+  pullInvitation,
   confirmMember
 }

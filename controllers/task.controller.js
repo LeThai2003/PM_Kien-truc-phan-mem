@@ -62,7 +62,7 @@ module.exports.updateCompleted = async (req, res, next) => {
     const {taskId} = req.params;
     const {listCheck} = req.body;
     const updatedTask = await taskService.updateCompeletedSubTask(listCheck, taskId, userId);
-    res.status(200).json({ message: "Updated complete task", updatedTask });
+    res.status(200).json({ message: "Updated complete task", task: updatedTask });
   } catch (error) {
     next(error);
   }
