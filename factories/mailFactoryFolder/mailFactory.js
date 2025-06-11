@@ -1,4 +1,4 @@
-const InvitationMemberMail = require("./mailTemplates/InvitationMemberMail");
+const InvitationMemberMail = require("./mailTemplates/invitationMemberMail");
 const OtpPasswordMail = require("./mailTemplates/otpMail");
 
 
