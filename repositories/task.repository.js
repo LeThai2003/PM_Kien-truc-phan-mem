@@ -56,7 +56,11 @@ const TaskRepository = {
 
   deleteById: async (id) => {
     await Task.findByIdAndDelete(id);
-  }
+  },
+
+  deleteTaskInArrayIds: async (tasksId) => {
+    await Task.deleteMany({_id: {$in: tasksId}});
+  },
 }
 
 module.exports = TaskRepository

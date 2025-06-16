@@ -113,3 +113,13 @@ module.exports.percentCompleted = async (req, res, next) => {
     next(error);
   }
 }
+
+// [DELETE] /project/delete/:projectId
+module.exports.deleteProject = async (req, res, next) => {
+  try {
+    await projectService.deleteProject(req.params.projectId, req.userId);
+    return res.status(200).json({message: "deleted project"})
+  } catch (error) {
+    next(error);
+  }
+}

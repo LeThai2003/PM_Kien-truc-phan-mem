@@ -3,6 +3,7 @@ const projectRepo = require("../repositories/project.repository");
 const userRepo = require("../repositories/user.repository");
 const taskRepo = require("../repositories/task.repository");
 const notificationRepo = require("../repositories/notification.repository");
+const commentRepo = require("../repositories/comment.repository");
 const {createError} = require("../utils/createError");
 const tokenFactory = require("../factories/tokenFactory");
 const mailService = require("./mail.service");
@@ -153,6 +154,25 @@ const getChartData = async (userId) => {
   return data;
 }
 
+const deleteProject = async (projectId, userId) => {
+  const project = await projectRepo.findById(projectId);
+  if(!project.authorUserId._id.equals(userId)) throw createError(400, "You couldn't delete this project");
+
+  const tasks = await taskRepo.findAllByProject(projectId);
+  if(tasks.length > 0)
+  {
+    const tasksId = tasks.map(task => task._id);
+
+    await commentRepo.deleteCommentByArrayTasksId(tasksId);
+
+    await notificationRepo.deleteNotificationByArrayTasksId(tasksId, projectId);
+
+    await taskRepo.deleteTaskInArrayIds(tasksId);
+  }
+
+  await projectRepo.deleteProject(projectId);
+}
+
 const getPercentCompeleted = async (userId) => {
   const projects = await projectRepo.findAllByUser(userId);
   const projectIds = projects?.map(p => p._id) || [];
@@ -208,5 +228,6 @@ module.exports = {
   removeMemberInv,
   confirmInvite,
   getChartData,
-  getPercentCompeleted
+  getPercentCompeleted,
+  deleteProject,
 }

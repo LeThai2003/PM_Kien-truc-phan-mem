@@ -10,9 +10,6 @@ const EVENT_TYPES = require("../events/eventType");
 const TaskService = {
   createTask: async (data, userId) => {
 
-    console.log("---------------------------------");
-    console.log(data);
-
     const {projectId, title, assigneeUserId} = data;
     const project = await projectRepo.findById(projectId);
     const memberIds = [project.authorUserId._id, ...(project.membersId || []).map(m => m._id)];

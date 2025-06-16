@@ -21,5 +21,7 @@ router.get("/data/chart", projectController.dataChart);
 
 router.get("/get-percent-completed", projectController.percentCompleted);
 
+router.delete("/delete/:projectId", projectController.deleteProject);
+
 
 module.exports = router;

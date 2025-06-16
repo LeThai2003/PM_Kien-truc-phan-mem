@@ -53,6 +53,12 @@ const confirmMember = async (projectId, memberId, email) => {
     .select("-invitations");
 };
 
+const deleteProject = async (projectId) => {
+  return await Project.deleteOne({_id: projectId});
+};
+
+
+
 module.exports = {
   createProject,
   findById,
@@ -60,5 +66,6 @@ module.exports = {
   findAllByUser,
   pushInvitation,
   pullInvitation,
-  confirmMember
+  confirmMember,
+  deleteProject
 }

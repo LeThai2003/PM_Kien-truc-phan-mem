@@ -27,7 +27,15 @@ const CommentRepository = {
   findById: async (commentId) => {
     return await Comment.findById(commentId)
       .populate("userId", "fullname profilePicture");
-  }
+  },
+
+  findCommentOfArrayTasksId: async (arrTasksId) => {
+    return await Comment.find({taskId: {$in: arrTasksId}}).select("_id");
+  },
+
+  deleteCommentByArrayTasksId: async (arrTasksId) => {
+    return await Comment.deleteMany({taskId: {$in: arrTasksId}});
+  },
 
 }
 
