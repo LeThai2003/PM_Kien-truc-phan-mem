@@ -33,22 +33,29 @@ const CommentService = {
     else eventBus.emit(EVENT_TYPES.COMMENT.NEW, {comment: newComment, taskId});
 
     // ------ Notification for task's author & assignee (necessary). Then save in database
+    // let relatedUserNotify = [task.authorUserId._id];
     let relatedUserNotify = [task.authorUserId._id, task.assigneeUserId?._id];
-    // console.log(relatedUserNotify);
-    for (const targetUserId of relatedUserNotify) {
-
-      if (targetUserId.toString() == userId) continue;
-
-      const viewingTask = userTaskMap.get(targetUserId.toString());
-
-      if (!viewingTask || (viewingTask !== taskId)){
-        const notification = await notificationRepo.createAndSave(
-          type = "comment",
-          data = { user: userFullname, task, comment: newComment, targetUserId }
-        )
-        eventBus.emit(EVENT_TYPES.NOTIFICATION.NEW_COMMENT, {notification: notification});
+    if(relatedUserNotify.length > 0)
+    {
+      for (const targetUserId of relatedUserNotify) {
+        if (targetUserId === undefined || targetUserId === null) continue;
+        if (targetUserId.toString() == userId) continue;
+        const viewingTask = userTaskMap.get(targetUserId.toString());
+        if (!viewingTask || (viewingTask !== taskId)){
+          const notification = await notificationRepo.createAndSave(
+            type = "comment",
+            data = {
+              user: userFullname,
+              task,
+              comment: newComment,
+              targetUserId
+            }
+          )
+          eventBus.emit(EVENT_TYPES.NOTIFICATION.NEW_COMMENT, {notification: notification});
+        }
       }
     }
+    
     // -----------end socket----------------
 
     return newComment;

@@ -1,6 +1,8 @@
 const app = require("./app");
 const http = require("http");
-const {initSocket} = require("./socket/index");
+const {
+  initSocket
+} = require("./socket/index");
 require("./events/listeners/commentEvent");
 require("./events/listeners/notificationEvent");
 require("./events/listeners/taskEvent");
